@@ -1,0 +1,194 @@
+<!---THIS HTML IS MINE-->
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <meta name="google-signin-client_id" content="YOUR_CLIENT_ID.apps.googleusercontent.com">
+    <script src="https://apis.google.com/js/platform.js?onload=renderApp" async defer></script>
+
+    
+    <script>
+      function SignIN(){
+
+      //const url = 'http://127.0.0.1:5000/sign_in'; 
+      var data = {'Name' : '', 'Password' : ''}
+      
+      $.ajax({
+                      url: 'http://127.0.0.1:5000/sign_in',
+                      method: 'POST',
+                      data: data,
+                      crossDomain: false,
+                      mode : 'no-cors',
+                      dataType : 'json',
+                    }).done(function (data) {
+                      console.log(data);
+
+                    }).fail(function (error) {
+                      alert(error);
+                    });
+      }
+
+
+  </script>
+
+
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> 
+    <title>Great Amazing Coding Language Database</title>
+    <link href="css/style.css" rel="stylesheet" type="text/css" />
+    <!-- The relates to the Google Font used in h1 -->
+    <link href='https://fonts.googleapis.com/css?family=Caesar Dressing' rel='stylesheet'>
+    <script src="https://apis.google.com/js/platform.js?onload=renderApp" async defer></script>
+
+    <div class="header">
+      <img src="images/title.png">
+    </div>
+  </head>
+  <div class="wrapper">
+    <body>
+      <!-- The Nav Bar goes here -->
+      <nav>
+        <ul>
+          <li id='active'></li>
+        </ul>
+    </nav>
+    <main>
+      <div id="overlay"></div>
+      <center><button class = 'sign_in_button' onclick = 'SignIN()'>Sign in! Else u suck</button></center>
+      <!-- page heading- add name here! -->
+      <h1>Coding Language Database</h1>
+      <h2>Alexander the Great Almighty Powerful, ruler of all and Bestower Of Wisdom</h2>
+      <!-- now the Information text box-->
+      <div class=information>
+        <p>
+            Database <br><br>
+            things. 
+        </p>  
+      </div>  
+      
+      <div class='container'>
+        <button class = 'get_names' id = 'id' onclick = "add_remove_data('id')">id</button>
+        <button class = 'get_names' id = 'name' onclick = "add_remove_data('name')">names</button>
+        <button class = 'get_names' id = 'type' onclick = "add_remove_data('type')">type</button>
+        <button class = 'get_names' id = 'release_year' onclick = "add_remove_data('release_year')">year</button>
+
+        <button class = 'get_data' id="submitbutton" onclick="sendData()">submit</button>
+      </div>
+      <div id="output"></div>
+
+      <div class='container'>
+        <div class='textplain'>
+          <textarea rows=10 id="submit_code"></textarea>
+
+          <script> 
+            var modes = {'id' : false, 'name' : false, 'type' : false, 'release_year' : false};
+            var total_string = '';
+
+
+          document.onkeypress = function (e) {
+              e = e || window.event;
+              var string = document.getElementById('submit_code').value;
+              var string = string.toLowerCase();
+              string = string.replace('select ' , '<span style="color: #ff0000">select </span>');
+              document.getElementById('submit_code').innerHTML = string;
+              console.log(string);
+          };
+
+            function add_remove_data(string){
+              var button = document.getElementById(string);
+              if(modes[string] == false){
+                button.style.background='#9DFFA8'
+                modes[string] = true;
+              } else{
+                button.style.background='#FFAF9D'
+                modes[string] = false;
+              }
+              total_string = '';
+              for(var index in modes){
+                console.log(index);
+                if(modes[index] == true){
+                  total_string += index + ',';
+                }
+              }
+              total_string = total_string.slice(0, -1)
+              if (total_string != ''){
+              total_string = "SELECT " + total_string + ' FROM Languages;';}
+              console.log(total_string);
+            }
+
+            function sendData() { 
+              var value = document.getElementById('submit_code').value; 
+              if(document.getElementById('submit_code').value == '' && total_string != ''){
+                var value = total_string;
+              } 
+              if (document.getElementById('submit_code').value == '' && total_string == ''){
+                var value = 'Select * FROM Languages;'
+              }
+              if (document.getElementById('submit_code').value != ''){
+                var value = document.getElementById('submit_code').value; 
+              }
+                //var value = document.getElementById('submit_code').value; 
+                console.log('Sending Data: ' + value);
+                const url = 'http://127.0.0.1:5000/get_data'; 
+                var mode = 'POST'; 
+                var data = {'data' : value};
+                var table = document.getElementById('data_table')
+
+                $.ajax({
+                      url: url,
+                      method: mode,
+                      data: data,
+                      crossDomain: false,
+                      mode : 'no-cors',
+                      dataType : 'json',
+                    }).done(function (data) {
+                      //console.log(data['columns']);
+                      //console.log(data['data']);
+                      var table_data = data;
+
+                      var tables = {};
+                      var table_data_holder = [];
+                      var data_string = '<tr>';
+                      for(var column in data['columns']){
+                        data_string += '<th>' + data['columns'][column] + '</th>';
+                        tables[data['columns'][column]] = [];
+                        //console.log(data['columns'][column]);
+                      }
+                      data_string += '</tr>';
+                      //console.log(data['data']);
+                      
+                      for(var item in data['rows']){
+                        data_string += '<tr>';
+                        for(value in data['rows'][item]){
+                          data_string += "<td>" + data['rows'][item][value] +"</td>";
+                          //console.log(data['rows'][item][value]);
+                        }
+                        data_string += '</tr>';
+                      }
+                      
+                      data_string = data_string + '</tr>'
+                      //console.log(data_string);
+
+                      table.innerHTML = data_string;
+                    
+
+                    }).fail(function (error) {
+                      alert(error);
+                    });
+
+            }
+        </script> 
+      </div>
+      <table class = 'the_data_table' id = 'data_table' border = "1px">
+      </table>
+    </main>  
+    <footer>
+      <p>&#169;This is MY website. not yours, mine. - Alexander Krakowiak</p>
+    </footer>
+
+
+  </body>
+</html>
